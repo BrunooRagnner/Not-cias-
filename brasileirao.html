@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Brasileirão 2024</title>
+    <meta name="description" content="Site de notícias atualizado com informações sobre o Brasileirão.">
+</head>
+<style>
+/* Estilo para o header e navbar */
+header {
+    background-color: #006400; /* Cor verde escuro */
+    padding: 10px 0;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+nav ul li a:hover,
+nav ul li a:focus,
+nav ul li a:active {
+    color: #00ff00; /* Verde claro ao passar o mouse */
+}
+
+/* Estilo para o rodapé */
+footer {
+    background-color: #006400;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Estilo para o corpo e container principal */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* Estilo para o título principal */
+h1 {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 2.5em;
+    color: #006400;
+}
+
+/* Estilo para o card */
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    overflow: hidden;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto; /* Centralizar os cards na página */
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+/* Estilo para a imagem dentro do card */
+.card img {
+    width: 100%;
+    height: auto;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Estilo para o conteúdo do card */
+.card-content {
+    padding: 20px;
+}
+
+/* Estilo para o título da notícia */
+.card h2 {
+    font-size: 1.5em;
+    margin: 10px 0;
+    color: #333;
+}
+
+/* Estilo para o texto de descrição da notícia */
+.card p {
+    font-size: 1em;
+    margin: 10px 0;
+    color: #666;
+}
+
+/* Estilo para o vídeo dentro do card */
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* Proporção 16:9 */
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+    nav ul {
+        flex-direction: column;
+    }
+    nav ul li {
+        margin: 10px 0;
+    }
+    .card {
+        margin: 10px auto;
+    }
+}
+</style>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Notícias</a></li>
+                <li><a href="brasileirao.html">Brasileirão</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Notícias sobre o Brasileirão</h1>
+        <div id="noticias" class="container"></div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Notícias. Todos os direitos reservados.</p>
+    </footer>
+  <script>
+const apiKey = '4c51cfcbc1494cf981eca19083b55562';
+const url = 'https://newsapi.org/v2/everything';
+const isBrasileiraoPage = window.location.pathname.includes('brasileirao.html');
+let page = 1;
+let isLoading = false;
+
+const getNews = async () => {
+    const params = {
+        language: 'pt',
+        sortBy: 'publishedAt',
+        apiKey: apiKey,
+        q: isBrasileiraoPage ? 'Brasileirão' : 'notícias',
+        page: page,
+        pageSize: 10 // Limita a 10 notícias por página
+    };
+    try {
+        isLoading = true;
+        showLoadingIndicator();
+        const response = await fetch(`${url}?${new URLSearchParams(params)}`);
+        if (!response.ok) throw new Error('Erro ao acessar a API');
+        const data = await response.json();
+        displayNews(data.articles);
+        hideLoadingIndicator();
+    } catch (error) {
+        displayError(error);
+    } finally {
+        isLoading = false;
+    }
+};
+
+const showLoadingIndicator = () => {
+    const noticiasList = document.getElementById('noticias');
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading';
+    loadingIndicator.innerText = 'Carregando...';
+    noticiasList.appendChild(loadingIndicator);
+};
+
+const hideLoadingIndicator = () => {
+    const loadingIndicator = document.querySelector('.loading');
+    if (loadingIndicator) {
+        loadingIndicator.remove();
+    }
+};
+
+const displayNews = (articles) => {
+    const noticiasList = document.getElementById('noticias');
+    if (articles.length > 0) {
+        articles.forEach(article => {
+            const listItem = document.createElement('div');
+            listItem.className = 'card';
+            listItem.innerHTML = `
+                ${article.urlToImage ? `<img src="${article.urlToImage}" alt="${article.title}">` : ''}
+                <div class="card-content">
+                    <h2>${article.title}</h2>
+                    <p>${article.description}</p>
+                </div>
+                ${article.url.includes('youtube.com') ? `
+                    <div class="video-container">
+                        <iframe src="${article.url.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>
+                    </div>` : ''}
+            `;
+            noticiasList.appendChild(listItem);
+        });
+    } else {
+        noticiasList.innerHTML = '<div class="card"><div class="card-content"><li>Nenhuma notícia encontrada.</li></div></div>';
+    }
+};
+
+const displayError = (error) => {
+    document.getElementById('noticias').innerHTML = `<div class="card"><div class="card-content"><li>Erro ao acessar a API de notícias: ${error.message}</li></div></div>`;
+};
+
+const loadMoreNews = () => {
+    if (!isLoading) {
+        page++;
+        getNews();
+    }
+};
+
+window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+        loadMoreNews();
+    }
+});
+
+getNews();
+</script>
+</body>
+</html>
